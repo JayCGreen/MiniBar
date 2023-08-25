@@ -1,6 +1,7 @@
 import './App.css';
 import {useState} from 'react';
 import {Pantry} from './pantry'
+import { Drinks } from './drinkMenu';
 import {Home} from './home'
 import {BrowserRouter, Route, Router, Routes} from 'react-router-dom'
 
@@ -25,6 +26,7 @@ function App() {
       <Routes>
         <Route path='/' element={<Home />}/>
         <Route path='/pantry' element={<Pantry inventory={inventory} setInventory={setInventory}/>} /> 
+        <Route path='/bar' element={<Drinks inventory={inventory} />} /> 
       </Routes>
     </BrowserRouter>
     

@@ -21,7 +21,7 @@ export function Home() {
           <Heading level={5}>MiniMix</Heading>
           <Flex gap={'size-200'} direction={'column'}>
             <Button variant='accent' onPress={() => history('/pantry')}>Pantry</Button>
-            <Button variant='accent'>See Drinks</Button>
+            <Button variant='accent' onPress={() => history('/bar')}>See Drinks</Button>
           </Flex>
         </header>
       </div>
