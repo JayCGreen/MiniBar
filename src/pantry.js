@@ -1,6 +1,7 @@
 import './App.css';
 import {useState} from 'react';
-import {ActionButton, 
+import {ActionButton,
+  ButtonGroup,
   Column,
   Cell, 
   Divider, 
@@ -13,21 +14,26 @@ import {ActionButton,
   Row,
   TableBody,
   TableView,
-  TableHeader,defaultTheme} from '@adobe/react-spectrum';
+  TableHeader,
+  Text, defaultTheme, Button, DialogContainer, Dialog, DialogTrigger, TextField, Content} from '@adobe/react-spectrum';
+import AddCircle from '@spectrum-icons/workflow/AddCircle'
 
 const columns = [
   {id: 'name', name: 'Name'},
-  {id: 'count', name: 'Amount'}
 ]
 
 export function Pantry(props) {
   console.log(props)
   const {inventory, setInventory} = props
+  const [options, setOptions] = useState([])
   const [c, setCount] = useState(0);
-  console.log(inventory)
+  let customIngr = '';
+  console.log(inventory);
+  console.log(options);
 
   function drinkOptions(name){
-    return (
+    return (2
+      /*
       <MenuTrigger>
         <ActionButton variant='accent'>{name}</ActionButton>
         <Menu onAction={key =>
@@ -41,11 +47,9 @@ export function Pantry(props) {
 
           }
         }>
-          <Item key={25}>25oz (Fifth)</Item>
-          <Item key={33}>33oz (Liter)</Item>
-          <Item key={60}>60oz (Handle)</Item>
         </Menu>
       </MenuTrigger>
+      */
     )
   }
   
@@ -55,11 +59,37 @@ export function Pantry(props) {
       <div className="App">
         <header className="App-header">
           <Heading level={5}>Add ingredient</Heading>
-          <Flex gap={'size-200'} direction={'column'}>
+          <Flex gap={'size-200'} width={1000} direction={'column'}>
             <Flex gap={'size-200'}>
-              {drinkOptions('Vodka')}
-              {drinkOptions('Gin')}
-              {drinkOptions('Tequila')}
+              {options.map((item)=> <Button variant="accent" onPress={() => {
+                 if(!inventory.find(s => s.name===item)){
+                  setInventory([...inventory, {key: c, name: item, count: 0}]);
+                  setCount(c+1);
+                }
+              }}>{item}</Button>)}
+              <DialogTrigger type='popover'>
+                <Button> <AddCircle /> <Text> New Ingredient </Text></ Button>
+                {(close)=> (
+                <Dialog size='S'>
+                  <Heading level={2}>New ingredient</Heading>
+                  <Divider />
+                  <Content>
+                    <TextField autoFocus onChange={(value) => customIngr = value}/>
+                  </Content>
+                  
+                  <ButtonGroup>
+                    <Button variant="secondary" onPress={close}>Cancel</Button>
+                    <Button variant="accent" onPress={() => 
+                    {
+                      setOptions([...options, customIngr])
+                      setInventory([...inventory, {key: c, name: customIngr, count: 0}]);
+                      setCount(c+1)
+                      close()
+                      }}>Add</Button>
+                  </ButtonGroup>
+                </Dialog>)
+                }
+              </DialogTrigger>
             </Flex>
             <Divider />
             <Heading level={5}>Pantry</Heading>

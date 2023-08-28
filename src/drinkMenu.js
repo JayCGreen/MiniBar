@@ -18,65 +18,93 @@ import {Pantry} from './pantry'
 import {Home} from './home'
 import {BrowserRouter, Route, Router, Routes} from 'react-router-dom'
 
-async function getDrinks(setOp) {
-    let allDrinks;
-    fetch('https://thecocktaildb.com/api/json/v1/1/search.php?f=a').then((response) => {
-        if(response.ok){
-        response.json().then((list) => {
-          allDrinks = list
-          setOp(allDrinks)
-          console.log(allDrinks)
-        })
-        }else{
-        allDrinks = null;
-        }
+async function getDrinks() {
+    let allDrinks = [];
+    let letter = 'a';
+    const dataCatcher = (async () => {
+      while (letter.charCodeAt(0) !== 'z'.charCodeAt(0) + 1){
+        await fetch(`https://thecocktaildb.com/api/json/v1/1/search.php?f=${letter}`).then((response) => {
+            if(response.ok){
+            response.json().then((list) => {
+              allDrinks = list.drinks?.length > 0 ? allDrinks.concat(list.drinks) : allDrinks
+            })
+            return allDrinks;
+            }
+        }).catch((error) => console.log(error))
+        letter = String.fromCharCode(letter.charCodeAt(0) + 1);
+      }
+      return allDrinks
     })
-    return allDrinks;
+    const data = await dataCatcher();
+    return data;
 }
 
 export function Drinks(props) {
   const {inventory} = props;
-  console.log(inventory)
-  const [options, setOptions] = useState()
+  const [options, setOptions] = useState();
+  const [available, setAvailable] = useState();
+  console.log(options);
+  
+  useEffect(()=>{
+    if(!options) {
+      getDrinks().then((result) => {
+        setOptions(result)
+        setAvailable(drinkList(result, inventory))
+      })     
+    }
+  })
+  console.log(available)
+  
 
-  async function drinkList(totalList, pantry){
+  function drinkList(totalList, pantry){
     const ingr = totalList.map((item)=>
       {
+        if (!item){
+          console.log("Warning flag")
+        }
         let ans = new Array()
         let i = 1
         while (item[`strIngredient${i}`]){
           ans.push(item[`strIngredient${i}`])
           i++;
         }
-        return {name: item.strDrink , recipe: ans}
+        return {name: item.strDrink, recipe: ans}
       }
     )
     
     const possible = ingr.filter((item) =>
     {
       let ingredientHave = 0;
+      let totalIngredients = 0;
       item.recipe.forEach(element => {
+        totalIngredients ++;
         pantry.forEach(el2 =>
           {
             if (el2.name === element) ingredientHave++;
           }
         )
       });
-      return ingredientHave > 0
+      return totalIngredients - ingredientHave === 0
     }
     )
-    return possible
-  }
 
-  useEffect(()=>{
-    if(!options) {
-      getDrinks(setOptions);
+    const missing1 = ingr.filter((item) =>
+    {
+      let ingredientHave = 0;
+      let totalIngredients = 0;
+      item.recipe.forEach(element => {
+        totalIngredients ++;
+        pantry.forEach(el2 =>
+          {
+            if (el2.name === element) ingredientHave++;
+          }
+        )
+      });
+      return totalIngredients - ingredientHave === 1
     }
-    
-  })
-
-  const canMake = (options) ? drinkList(options.drinks, inventory).then((result) => (result)) : null
-  console.log(canMake)
+    )
+    return {possible, missing1}
+  }
 
   return (
     <Provider theme={defaultTheme}>
