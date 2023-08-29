@@ -6,17 +6,19 @@ import {ActionButton,
     Divider, 
     Flex, 
     Heading, 
-    Item, 
-    Menu, 
-    MenuTrigger,
     Provider,
     Row,
     TableBody,
     TableView,
-    TableHeader,defaultTheme} from '@adobe/react-spectrum';
+    TableHeader,defaultTheme, darkTheme} from '@adobe/react-spectrum';
 import {Pantry} from './pantry'
 import {Home} from './home'
-import {BrowserRouter, Route, Router, Routes} from 'react-router-dom'
+import {BrowserRouter, Route, Router, Routes} from 'react-router-dom';
+
+const columns = [
+  {id: 'name', name: 'Name'},
+  {id: 'recipe', name: 'Recipe'}
+]
 
 async function getDrinks() {
     let allDrinks = [];
@@ -39,6 +41,8 @@ async function getDrinks() {
     return data;
 }
 
+
+
 export function Drinks(props) {
   const {inventory} = props;
   const [options, setOptions] = useState();
@@ -57,6 +61,7 @@ export function Drinks(props) {
   
 
   function drinkList(totalList, pantry){
+    let count=0;
     const ingr = totalList.map((item)=>
       {
         if (!item){
@@ -68,52 +73,125 @@ export function Drinks(props) {
           ans.push(item[`strIngredient${i}`])
           i++;
         }
-        return {name: item.strDrink, recipe: ans}
+        return {key: count++, name: item.strDrink, recipe: ans}
       }
     )
     
     const possible = ingr.filter((item) =>
     {
       let ingredientHave = 0;
-      let totalIngredients = 0;
+      
       item.recipe.forEach(element => {
-        totalIngredients ++;
         pantry.forEach(el2 =>
           {
-            if (el2.name === element) ingredientHave++;
+            if (el2.name.toUpperCase() === element.toUpperCase()) {ingredientHave++};
           }
         )
       });
-      return totalIngredients - ingredientHave === 0
+      return item.recipe.length - ingredientHave === 0
     }
     )
 
     const missing1 = ingr.filter((item) =>
     {
       let ingredientHave = 0;
-      let totalIngredients = 0;
+      let lost = [];
       item.recipe.forEach(element => {
-        totalIngredients ++;
+        lost.push(element)
         pantry.forEach(el2 =>
           {
-            if (el2.name === element) ingredientHave++;
+            if (el2.name.toUpperCase() === element.toUpperCase()) {
+              ingredientHave++;
+              lost.pop()
+            }
           }
         )
+        
       });
-      return totalIngredients - ingredientHave === 1
+      return item.recipe.length - ingredientHave === 1
     }
     )
-    return {possible, missing1}
+
+    const missing2 = ingr.filter((item) =>
+    {
+      let ingredientHave = 0;
+      let lost = [];
+      item.recipe.forEach(element => {
+        lost.push(element)
+        pantry.forEach(el2 =>
+          {
+            if (el2.name.toUpperCase() === element.toUpperCase()) {
+              ingredientHave++;
+              lost.pop()
+            }
+          }
+        )
+        
+      });
+      return item.recipe.length - ingredientHave === 2
+    }
+    )
+    return {possible, missing1, missing2}
   }
 
+  function displayList(missingX){
+    let items = []
+    switch (missingX){
+      case 0: 
+        items = available.possible;
+        break;
+      case 1:  
+        items = available.missing1;
+        break;
+      case 2:  
+        items = available.missing2;
+        break;
+    }
+    return (
+      <TableView selectionMode="single" selectionStyle="highlight" maxHeight={'500px'}>
+        <TableHeader columns={columns}>
+          {(column) => (
+            <Column
+              key={column.id}
+            >
+              {column.name}
+            </Column>
+          )}
+        </TableHeader>
+        <TableBody items={items}>
+          {item =>(
+            <Row>
+              {columnKey => columnKey==='recipe'?<Cell>{item[columnKey].join(', ')}</Cell> : <Cell>{item[columnKey]}</Cell>}
+            </Row>
+          )
+          }
+        </TableBody>
+        </TableView>
+    )
+  }
+  console.log(available?.possible)
+  console.log(inventory)
+
   return (
-    <Provider theme={defaultTheme}>
+    <Provider theme={darkTheme}>
       <div className="App">
         <header className="App-header">
+        <Flex gap={'size-150'} direction={'row'} width={'100%'}>
+          <Flex direction={'column'} width={'32%'}>
           <Heading level={5}>Can make</Heading>
-          <Flex gap={'size-200'} direction={'column'}>
-            
+            {available ? displayList(0) : null}
           </Flex>
+          <Divider orientation='vertical' />
+          <Flex direction={'column'} width={'32%'}>
+          <Heading level={5}>Missing One Ingredient</Heading>
+            {available ? displayList(1) : null}
+          </Flex>
+          <Divider orientation='vertical'/>
+          <Flex direction={'column'} width={'32%'}>
+          <Heading level={5}>Missing Two Ingredient</Heading>
+            {available ? displayList(2) : null}
+          </Flex>
+        </Flex>
         </header>
       </div>
     </Provider>
