@@ -1,6 +1,7 @@
 import './App.css';
 import {useState, useEffect} from 'react';
 import {ActionButton, 
+    Button,
     Column,
     Cell, 
     Divider, 
@@ -10,10 +11,13 @@ import {ActionButton,
     Row,
     TableBody,
     TableView,
-    TableHeader,defaultTheme, darkTheme} from '@adobe/react-spectrum';
+    TableHeader,
+    Text,
+    defaultTheme, ProgressCircle, darkTheme, DialogContainer, Dialog, Content} from '@adobe/react-spectrum';
 import {Pantry} from './pantry'
 import {Home} from './home'
-import {BrowserRouter, Route, Router, Routes} from 'react-router-dom';
+import {BrowserRouter, Route, Router, Routes, useNavigate} from 'react-router-dom';
+import Switch from '@spectrum-icons/workflow/Switch'
 
 const columns = [
   {id: 'name', name: 'Name'},
@@ -41,12 +45,69 @@ async function getDrinks() {
     return data;
 }
 
+function clToOunce(measure){
+    let value = parseFloat(measure.split(' ')[0]) *  0.33814;
+    let wholeNum = Math.floor(value);
+    let decimal = value - wholeNum;
+    let fraction ='';
+    let nearestFourth = [Math.abs(decimal-.25), Math.abs(decimal-.5), Math.abs(decimal-.75), Math.abs(decimal-1)];
+    let minF = 2;
+    nearestFourth.forEach((num, i) => {
+      if (nearestFourth[minF] > num) minF = i;
+    })
+    let nearestThird = [Math.abs(decimal-.33), Math.abs(decimal-.66), Math.abs(decimal-1)];
+    let minT = 0;
+    nearestThird.forEach((num, i) => {
+      if (nearestThird[minT] > num) minT = i;
+    })
+    if(nearestThird[minT] > nearestFourth[minF]){
+      switch (minF){
+        case 0:
+          fraction='1/4'
+          if (wholeNum == 0) return '1 tsp'
+          break
+        case 1:
+          fraction = '1/2'
+          if (wholeNum == 0) return '1 tbsp'
+          break
+        case 3:
+          fraction = '3/4'
+          break
+        default:
+          wholeNum++;
+      } 
+    }else{
+      switch (minT){
+        case 0:
+          fraction='1/3'
+          if (wholeNum == 0) return '1 tsp'
+          break
+        case 1:
+          fraction = '2/3'
+          if (wholeNum == 0) return '1 tblsp'
+          break
+        default:
+          wholeNum++;
+      } 
+    }
+
+    if (wholeNum == 0 && Math.max(minF, minT) <= 1){
+      if (Math.max(minF, minT) == 0){
+        return `${parseInt(decimal*6)} tsp`
+      }
+      return `${parseInt(decimal*2)} tbsp`
+    }
+    
+    return `${wholeNum > 0 ? wholeNum : ''} ${fraction} oz`
+}
 
 
 export function Drinks(props) {
   const {inventory} = props;
   const [options, setOptions] = useState();
   const [available, setAvailable] = useState();
+  const [selected, setSelection] = useState(false);
+  const history = useNavigate();
   console.log(options);
   
   useEffect(()=>{
@@ -67,13 +128,17 @@ export function Drinks(props) {
         if (!item){
           console.log("Warning flag")
         }
-        let ans = new Array()
+        let parts = new Array()
+        let measurements = new Array()
         let i = 1
         while (item[`strIngredient${i}`]){
-          ans.push(item[`strIngredient${i}`])
+          parts.push(item[`strIngredient${i}`])
+          //console.log(item[`strMeasure${i}`])
+          measurements.push(item[`strMeasure${i}`]?.includes(' cl') ? 
+            clToOunce(item[`strMeasure${i}`]) : item[`strMeasure${i}`])
           i++;
         }
-        return {key: count++, name: item.strDrink, recipe: ans}
+        return {key: count++, name: item.strDrink, recipe: parts, instructions: item.strInstructions, measurements: measurements}
       }
     )
     
@@ -148,10 +213,24 @@ export function Drinks(props) {
         break;
     }
     return (
-      <TableView selectionMode="single" selectionStyle="highlight" maxHeight={'500px'}>
+      <TableView selectionMode="single" selectionStyle="highlight" maxHeight={'500px'} minWidth={'80%'}
+      onSelectionChange={(item) => {
+        switch (missingX){
+          case 0: 
+             setSelection(available.possible.find((drink)=> item.currentKey === drink.key))
+            break;
+          case 1:  
+            setSelection(available.missing1.find((drink)=> item.currentKey === drink.key));
+            break;
+          case 2:  
+            setSelection(available.missing2.find((drink)=> item.currentKey === drink.key));
+            break;
+        }
+      }}
+      >
         <TableHeader columns={columns}>
           {(column) => (
-            <Column
+            <Column align='center'
               key={column.id}
             >
               {column.name}
@@ -169,28 +248,52 @@ export function Drinks(props) {
         </TableView>
     )
   }
-  console.log(available?.possible)
-  console.log(inventory)
+  //console.log(available?.possible.find((item)=> item.key ===selected))
+  console.log(selected)
+  console.log(clToOunce('6 cl'))
 
   return (
     <Provider theme={darkTheme}>
       <div className="App">
         <header className="App-header">
+          <Button aria-label='Switch to Menu' marginBottom={'size-200'} onPress={() => history('/pantry')}>
+            <Switch /><Text>Switch to Pantry</Text>
+          </Button>
         <Flex gap={'size-150'} direction={'row'} width={'100%'}>
-          <Flex direction={'column'} width={'32%'}>
+          <Flex direction={'column'} width={'32%'} alignItems={'center'}>
           <Heading level={5}>Can make</Heading>
-            {available ? displayList(0) : null}
+            {available ? displayList(0) : <ProgressCircle aria-label="Loading…" isIndeterminate />}
           </Flex>
           <Divider orientation='vertical' />
-          <Flex direction={'column'} width={'32%'}>
+          <Flex direction={'column'} width={'32%'} alignItems={'center'}>
           <Heading level={5}>Missing One Ingredient</Heading>
-            {available ? displayList(1) : null}
+            {available ? displayList(1) : <ProgressCircle aria-label="Loading…" isIndeterminate />}
           </Flex>
           <Divider orientation='vertical'/>
-          <Flex direction={'column'} width={'32%'}>
-          <Heading level={5}>Missing Two Ingredient</Heading>
-            {available ? displayList(2) : null}
+          <Flex direction={'column'} width={'32%'} alignItems={'safe center'}>
+          <Heading level={5}>Missing Two Ingredients</Heading>
+            {available ? displayList(2) : <ProgressCircle aria-label="Loading…" isIndeterminate />}
           </Flex>
+          <DialogContainer onDismiss={()=>setSelection(false)} isDismissable isKeyboardDismissDisabled={false}>
+            {
+              selected && (
+                <Dialog>
+                  <Heading level={5}>{selected.name}</Heading>
+                  <Content>
+                    <Flex gap={'size-150'} direction={'column'}>
+                      <Text>Recipe: {selected.recipe.map(( v, i) => selected.measurements[i] ? 
+                        `${selected.measurements[i]} of ${v}` : v).join(', ')}</Text>
+                      <Divider size='S'/>
+                      <Text>
+                        {selected.instructions}
+                      </Text>
+                    </Flex>
+                  </Content>
+                </Dialog>
+              )
+            }
+
+          </DialogContainer>
         </Flex>
         </header>
       </div>

@@ -13,7 +13,10 @@ import {ActionButton,
   TableView,
   TableHeader,
   Text, defaultTheme, Button, Dialog, DialogTrigger, TextField, Content, darkTheme} from '@adobe/react-spectrum';
+import {useNavigate} from 'react-router-dom'
 import AddCircle from '@spectrum-icons/workflow/AddCircle'
+import Close from '@spectrum-icons/workflow/Close'
+import Switch from '@spectrum-icons/workflow/Switch'
 
 const columns = [
   {id: 'name', name: 'Name'},
@@ -23,6 +26,7 @@ export function Pantry(props) {
   console.log(props)
   const {inventory, setInventory} = props
   const [options, setOptions] = useState([])
+  const history = useNavigate();
   let customIngr = '';
   console.log(inventory);
   console.log(options);
@@ -31,22 +35,27 @@ export function Pantry(props) {
     <Provider theme={darkTheme}>
       <div className="App">
         <header className="App-header">
-          <Heading level={5}>Add ingredient</Heading>
-          <Flex gap={'size-200'} width={1000} direction={'column'}>
-            <Flex gap={'size-200'}>
-              {options.map((item)=> <Button variant="accent" onPress={() => {
-                 if(!inventory.find(s => s.name===item)){
-                  setInventory([...inventory, {key: inventory.length+1, name: item, count: 0}]);
-                }
-              }}>{item}</Button>)}
-              <DialogTrigger type='popover'>
-                <Button> <AddCircle /> <Text> New Ingredient </Text></ Button>
+        <Button aria-label='Switch to Menu' marginBottom={'size-200'} onPress={() => history('/bar')}>
+          <Switch /><Text>Switch to Drink List</Text>
+        </Button>
+        <Heading level={5}>Pantry</Heading>
+          <Flex gap={'size-400'} width={1000} direction={'column'} alignItems={'center'}>
+            
+            <Divider />
+            <DialogTrigger type='popover'>
+                <Button > <AddCircle /> <Text> New Ingredient </Text></ Button>
                 {(close)=> (
                 <Dialog size='S'>
                   <Heading level={2}>New ingredient</Heading>
                   <Divider />
                   <Content>
-                    <TextField autoFocus onChange={(value) => customIngr = value}/>
+                    <TextField autoFocus onChange={(value) => customIngr = value} onKeyDown={e => {
+                      if (e.code=== 'Enter'){
+                        setOptions([...options, customIngr])
+                        setInventory([...inventory, {key: inventory.length+1, name: customIngr, count: 0}]);
+                        close()
+                      }
+                      }}/>
                   </Content>
                   
                   <ButtonGroup>
@@ -60,29 +69,14 @@ export function Pantry(props) {
                   </ButtonGroup>
                 </Dialog>)
                 }
-              </DialogTrigger>
-            </Flex>
-            <Divider />
-            <Heading level={5}>Pantry</Heading>
-            <TableView selectionMode="single" selectionStyle="highlight">
-              <TableHeader columns={columns}>
-                {(column) => (
-                  <Column
-                    key={column.id}
-                  >
-                    {column.name}
-                  </Column>
-                )}
-              </TableHeader>
-              <TableBody items={inventory}>
-                {item =>(
-                  <Row>
-                    {columnKey => <Cell>{item[columnKey]}</Cell>}
-                  </Row>
-                )
-                }
-              </TableBody>
-            </TableView>
+            </DialogTrigger>
+            <ButtonGroup>
+              {inventory.map((item)=> 
+              <Button variant="accent" >
+                <Text>{item.name}</Text><Close alignSelf={'center'} size='S'/>
+              </Button>)}
+            </ButtonGroup>
+            
             
             
           </Flex>
