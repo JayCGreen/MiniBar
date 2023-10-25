@@ -4,6 +4,13 @@ The goal of this app is for a user to see what drinks they can make using what i
 
 The user populates their in-app pantry with the items they have and then go to the "See Drinks" section to see what drinks they can make, along with which ones they are only short an ingredient or two for.
 
+For example
+![](demo/HomeScreen.png)
+![](demo/PantryScreen.png)
+![](demo/DrinkList.png)
+
+Below is the default ReadMe text for using Create React App
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 
