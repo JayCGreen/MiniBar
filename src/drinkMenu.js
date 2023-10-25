@@ -125,6 +125,7 @@ export function Drinks(props) {
   
 
   function drinkList(totalList, pantry){
+    let count = 0
     const ingr = totalList.map((item)=>
       {
         if (!item){
