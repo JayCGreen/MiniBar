@@ -1,15 +1,12 @@
 import './App.css';
 import {useState, useEffect} from 'react';
-import {ActionButton, 
+import {
     Button,
     Column,
     Cell, 
     Divider, 
     Flex, 
     Heading, 
-    Item, 
-    Menu, 
-    MenuTrigger,
     Provider,
     Row,
     TableBody,
@@ -117,7 +114,9 @@ export function Drinks(props) {
     if(!options) {
       getDrinks().then((result) => {
         setOptions(result)
+        console.log(result)
         setAvailable(drinkList(result, inventory))
+        console.log(available)
       })     
     }
   })
@@ -144,7 +143,6 @@ export function Drinks(props) {
         return {key: count++, name: item.strDrink, recipe: parts, instructions: item.strInstructions, measurements: measurements}
       }
     )
-    
     const possible = ingr.filter((item) =>
     {
       let ingredientHave = 0;
@@ -153,7 +151,7 @@ export function Drinks(props) {
         totalIngredients ++;
         pantry.forEach(el2 =>
           {
-            if (el2.name === element) ingredientHave++;
+            if (el2.name.toUpperCase() === element.toUpperCase()) ingredientHave++;
           }
         )
       });
@@ -169,14 +167,36 @@ export function Drinks(props) {
         totalIngredients ++;
         pantry.forEach(el2 =>
           {
-            if (el2.name === element) ingredientHave++;
+            if (el2.name.toUpperCase() === element.toUpperCase())
+            {
+              ingredientHave++;
+            }
           }
         )
       });
       return totalIngredients - ingredientHave === 1
     }
     )
-    return {possible, missing1}
+
+    const missing2 = ingr.filter((item) =>
+    {
+      let ingredientHave = 0;
+      let totalIngredients = 0;
+      item.recipe.forEach(element => {
+        totalIngredients ++;
+        pantry.forEach(el2 =>
+          {
+            if (el2.name.toUpperCase() === element.toUpperCase())
+            {
+              ingredientHave++;
+            }
+          }
+        )
+      });
+      return totalIngredients - ingredientHave === 2
+    }
+    )
+    return {possible, missing1, missing2}
   }
 
   function displayList(missingX){
@@ -229,9 +249,6 @@ export function Drinks(props) {
     )
   }
   //console.log(available?.possible.find((item)=> item.key ===selected))
-  console.log(selected)
-  console.log(clToOunce('6 cl'))
-
   return (
     <Provider theme={defaultTheme}>
       <div className="App">
