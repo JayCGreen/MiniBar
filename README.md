@@ -1,10 +1,10 @@
-# MiniMix
+# MiniBar (formerly MiniMix)
 
 The goal of this app is for a user to see what drinks they can make using what ingredients they have in their house already.
 
 The user populates their in-app pantry with the items they have and then go to the "See Drinks" section to see what drinks they can make, along with which ones they are only short an ingredient or two for.
 
-To demo view this project, use [this url](https://jaycgreen.github.io/MiniMix/). For picture demo see the images below
+To demo view this project, use [this url](https://jaycgreen.github.io/MiniBar/). For picture demo see the images below
 
 For example
 ![](demo/HomeScreen.png)

@@ -5,7 +5,8 @@ import {ActionButton,
   Column,
   Cell, 
   Divider, 
-  Flex, 
+  Flex,
+  Form, 
   Heading, 
   Provider,
   Row,
@@ -33,40 +34,38 @@ export function Pantry(props) {
   
   return (
     <Provider theme={darkTheme}>
-      <div className="App">
+      <div className="App" maxHeight={'90vh'} maxWidth={'100vw'}>
         <header className="App-header">
-        <Button aria-label='Switch to Menu' marginBottom={'size-200'} onPress={() => history('/bar')}>
+        <Button aria-label='Switch to Menu' marginBottom={'2%'} onPress={() => history('/bar')}>
           <Switch /><Text>Switch to Drink List</Text>
         </Button>
         <Heading level={5}>Pantry</Heading>
-          <Flex gap={'size-400'} width={1000} direction={'column'} alignItems={'center'}>
+          <Flex gap={'5vh'} direction={'column'} alignItems={'center'}>
             
             <Divider />
-            <DialogTrigger type='popover'>
+            <DialogTrigger type='modal' alignItems={'center'}>
                 <Button > <AddCircle /> <Text> New Ingredient </Text></ Button>
                 {(close)=> (
-                <Dialog size='S'>
+                <Dialog size='S' maxWidth={'25vh'} minHeight={'20vh'}>
                   <Heading level={2}>New ingredient</Heading>
                   <Divider />
                   <Content>
-                    <TextField autoFocus onChange={(value) => customIngr = value} onKeyDown={e => {
-                      if (e.code=== 'Enter'){
-                        setOptions([...options, customIngr])
+                  <Form onSubmit={(e)=>{
+                      e.preventDefault()
+                      if(customIngr){
                         setInventory([...inventory, {key: inventory.length+1, name: customIngr, count: 0}]);
-                        close()
+                        setOptions([...options, customIngr])
                       }
-                      }}/>
-                  </Content>
-                  
+                      close()
+                    }
+                    }>
+                    <TextField autoFocus onChange={(val) => customIngr = val}/>
                   <ButtonGroup>
                     <Button variant="secondary" onPress={close}>Cancel</Button>
-                    <Button variant="accent" onPress={() => 
-                    {
-                      setOptions([...options, customIngr])
-                      setInventory([...inventory, {key: inventory.length+1, name: customIngr, count: 0}]);
-                      close()
-                      }}>Add</Button>
+                    <Button variant="accent" type='submit'>Add</Button>
                   </ButtonGroup>
+                  </Form>
+                  </Content>
                 </Dialog>)
                 }
             </DialogTrigger>

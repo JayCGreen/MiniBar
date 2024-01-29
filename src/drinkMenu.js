@@ -253,21 +253,21 @@ export function Drinks(props) {
     <Provider theme={defaultTheme}>
       <div className="App">
         <header className="App-header">
-          <Button aria-label='Switch to Menu' marginBottom={'size-200'} onPress={() => history('/pantry')}>
+          <Button aria-label='Switch to Menu' margin={'5%'} onPress={() => history('/pantry')}>
             <Switch /><Text>Switch to Pantry</Text>
           </Button>
-        <Flex gap={'size-150'} direction={'row'} width={'100%'}>
-          <Flex direction={'column'} width={'32%'} alignItems={'center'}>
+        <Flex gap={'size-150'} direction={ window.innerWidth > 500? 'row' : 'column'} width={'100%'}>
+          <Flex direction={'column'} width={window.innerWidth > 500? '32%' : '90vw'} alignItems={'center'}>
           <Heading level={5}>Can make</Heading>
             {available ? displayList(0) : <ProgressCircle aria-label="Loading…" isIndeterminate />}
           </Flex>
           <Divider orientation='vertical' />
-          <Flex direction={'column'} width={'32%'} alignItems={'center'}>
+          <Flex direction={'column'} width={window.innerWidth > 500? '32%' : '90vw'} alignItems={'center'}>
           <Heading level={5}>Missing One Ingredient</Heading>
             {available ? displayList(1) : <ProgressCircle aria-label="Loading…" isIndeterminate />}
           </Flex>
           <Divider orientation='vertical'/>
-          <Flex direction={'column'} width={'32%'} alignItems={'safe center'}>
+          <Flex direction={'column'} width={window.innerWidth > 500? '32%' : '90vw'} alignItems={'safe center'}>
           <Heading level={5}>Missing Two Ingredients</Heading>
             {available ? displayList(2) : <ProgressCircle aria-label="Loading…" isIndeterminate />}
           </Flex>
