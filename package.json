@@ -1,7 +1,7 @@
 {
-  "name": "minimix",
+  "name": "minibar",
   "version": "0.1.0",
-  "homepage": "https://jaycgreen.github.io/MiniMix/",
+  "homepage": "https://jaycgreen.github.io/MiniBar/",
   "private": false,
   "dependencies": {
     "@adobe/react-spectrum": "^3.29.0",

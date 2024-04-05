@@ -1,88 +1,59 @@
 import './App.css';
 import {useState} from 'react';
-import {ActionButton,
+import {
   ButtonGroup,
-  Column,
-  Cell, 
   Divider, 
   Flex,
-  Form, 
+  Footer,
+  Form,
   Heading, 
-  Provider,
-  Row,
-  TableBody,
-  TableView,
-  TableHeader,
-  Text, defaultTheme, Button, Dialog, DialogTrigger, TextField, Content, darkTheme} from '@adobe/react-spectrum';
-import {useNavigate} from 'react-router-dom'
-import AddCircle from '@spectrum-icons/workflow/AddCircle'
-import Close from '@spectrum-icons/workflow/Close'
-import Switch from '@spectrum-icons/workflow/Switch'
-
-const columns = [
-  {id: 'name', name: 'Name'},
-]
+  Text, Button, Dialog, DialogTrigger, TextField, Content} from '@adobe/react-spectrum';
+import AddCircle from '@spectrum-icons/workflow/AddCircle';
+import Edit from '@spectrum-icons/workflow/Edit';
 
 export function Pantry(props) {
-  console.log(props)
-  const {inventory, setInventory} = props
-  const [options, setOptions] = useState([])
-  const history = useNavigate();
-  let customIngr = '';
-  console.log(inventory);
-  console.log(options);
+  const {inventory, setInventory, canStart} = props;
+  const [ingredient, setIngredient] = useState('');
   
   return (
-    <Provider theme={darkTheme}>
-      <div className="App" maxHeight={'90vh'} maxWidth={'100vw'}>
-        <header className="App-header">
-        <Button aria-label='Switch to Menu' marginBottom={'2%'} onPress={() => history('/bar')}>
-          <Switch /><Text>Switch to Drink List</Text>
-        </Button>
-        <Heading level={5}>Pantry</Heading>
-          <Flex gap={'5vh'} direction={'column'} alignItems={'center'}>
-            
-            <Divider />
-            <DialogTrigger type='modal' alignItems={'center'}>
-                <Button > <AddCircle /> <Text> New Ingredient </Text></ Button>
-                {(close)=> (
-                <Dialog size='S' maxWidth={'25vh'} minHeight={'20vh'}>
-                  <Heading level={2}>New ingredient</Heading>
-                  <Divider />
-                  <Content>
-                  <Form onSubmit={(e)=>{
-                      e.preventDefault()
-                      if(customIngr){
-                        setInventory([...inventory, {key: inventory.length+1, name: customIngr, count: 0}]);
-                        setOptions([...options, customIngr])
-                      }
-                      close()
+      <DialogTrigger alignItems={'center'}>
+          <Button variant={'accent'} isDisabled={!canStart}> <Text>See Ingredients</Text></ Button>
+          {(close)=> (
+            <Dialog size={'L'} isDismissable>
+              <Heading>Available Ingredients</Heading>
+              <Divider />
+              <Content>
+                <ButtonGroup>
+                  {inventory?.map((item)=> 
+                    <Button key={item.key} variant="accent" onPress={() => {
+                        setInventory(inventory.filter((el) => item.name !== el.name));
+                        setIngredient(item.name);
+                      }}>
+                      <Text>{item.name} </Text> <Edit justifySelf={'start'} alignSelf={'end'} size='S'/>
+                    </Button>)
+                  }
+                </ButtonGroup>
+              </Content>
+              <Footer>
+                <Form onSubmit={(e)=>{
+                    e.preventDefault()
+                    if(ingredient){
+                      setInventory([...inventory, {key: inventory.length+1, name: ingredient}]);
+                      setIngredient('');
                     }
-                    }>
-                    <TextField autoFocus onChange={(val) => customIngr = val}/>
-                  <ButtonGroup>
-                    <Button variant="secondary" onPress={close}>Cancel</Button>
-                    <Button variant="accent" type='submit'>Add</Button>
+                  }
+                  }>
+                  <Flex direction={'row'}>
+                  <TextField autoFocus value={ingredient} onChange={(val)=> setIngredient(val)} label={'Add New Ingredient'}/>
+                  <ButtonGroup alignSelf={'end'} marginStart={5}>
+                    <Button variant="accent" type='submit'> <AddCircle justifySelf={'start'} alignSelf={'end'} /> Add</Button>
                   </ButtonGroup>
-                  </Form>
-                  </Content>
-                </Dialog>)
-                }
-            </DialogTrigger>
-            <ButtonGroup>
-              {inventory.map((item)=> 
-              <Button variant="accent" onPress={() => setInventory(inventory.filter((j) => {
-                console.log(item.name !== j.name)
-                return item.name !== j.name
-                
-                }))}>
-                <Text>{item.name}</Text><Close alignSelf={'center'} size='S'/>
-              </Button>)}
-            </ButtonGroup>
-          </Flex>
-        </header>
-      </div>
-    </Provider>
+                  </Flex>
+                </Form>
+              </Footer>
+            </Dialog>)
+          }
+      </DialogTrigger>
   );
 }
 
