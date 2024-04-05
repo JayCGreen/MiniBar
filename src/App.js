@@ -1,7 +1,6 @@
 import './App.css';
 import {useState, useEffect} from 'react';
 import {BarFront} from './barFront';
-import {Home} from './home'
 import {BrowserRouter, Route, Routes} from 'react-router-dom'
 
 async function getDrinks() {
@@ -61,8 +60,7 @@ function App() {
   return (
     <BrowserRouter basename={process.env.PUBLIC_URL}>
       <Routes>
-        <Route path='/' element={<Home />}/>
-        <Route path='/bar' element={<BarFront allDrinks={allDrinks}/>} /> 
+        <Route path='/' element={<BarFront allDrinks={allDrinks}/>} /> 
       </Routes>
     </BrowserRouter>
   );

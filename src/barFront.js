@@ -27,7 +27,7 @@ export function BarFront(props) {
                 totalIngredients++;
                 pantry.forEach(el2 =>
                 {
-                    if (el2.name.toUpperCase() === el.toUpperCase()){
+                    if (el2.name.trim().toUpperCase() === el.toUpperCase()){
                         ingredientHave++;
                     }
                 }
