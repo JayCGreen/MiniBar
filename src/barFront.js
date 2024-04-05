@@ -24,10 +24,12 @@ export function BarFront(props) {
             let totalIngredients = 0;
 
             item.recipe.forEach(el => {
+                el = el.toUpperCase();
                 totalIngredients++;
                 pantry.forEach(el2 =>
                 {
-                    if (el2.name.trim().toUpperCase() === el.toUpperCase()){
+                    el2 = el2.name?.trim().toUpperCase();
+                    if (el2.includes(el) || el.includes(el2)){
                         ingredientHave++;
                     }
                 }
@@ -43,10 +45,12 @@ export function BarFront(props) {
             let found = false;
 
             item.recipe.forEach(el => {
+                el = el.toUpperCase();
                 found = false;
                 pantry.forEach(el2 =>
                 {
-                    if (el2.name.trim().toUpperCase() === el.toUpperCase()){
+                    el2 = el2.name.trim()?.toUpperCase();
+                    if (el2.includes(el) || el.includes(el2)){
                         found = true;
                     }
                 })
